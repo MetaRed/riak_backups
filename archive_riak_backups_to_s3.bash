@@ -17,18 +17,23 @@ S3_BUCKET="s3://s3-link"
 SERVER_NAME=$(hostname --fqdn)
 LOG_DIR=/path/to/log/dir
 
+# email function
+notify_email(){
+  mail -s "${0}: failed on ${SERVER_NAME}" $EMAIL
+}
+
 # make sure our log directory exists
 if [ ! -d $LOG_DIR ]; then
   mkdir $LOG_DIR
   if [ ! $? -eq 0 ]; then
-    echo "Unable to create log dir: $LOG_DIR" |mail -s "${0}: failed on $SERVER_NAME" $EMAIL
+    echo "Unable to create log dir: $LOG_DIR" | notify_email
     exit 1
   fi
 else
   touch $LOG_DIR/test
   rm $LOG_DIR/test
   if [ ! $? -eq 0 ]; then
-    echo "Unable to write to log dir: $LOG_DIR" |mail -s "${0}: failed on $SERVER_NAME" $EMAIL
+    echo "Unable to write to log dir: $LOG_DIR" | notify_email
     exit 1
   fi
 fi
@@ -37,7 +42,7 @@ fi
 touch $BACKUP_DIR/test
 rm $BACKUP_DIR/test
 if [ ! $? -eq 0 ]; then
-  echo "Unable to write to backup dir: $BACKUP_DIR" |mail -s "${0}: failed on $SERVER_NAME" $EMAIL
+  echo "Unable to write to backup dir: $BACKUP_DIR" | notify_email
   exit 1
 fi
 
